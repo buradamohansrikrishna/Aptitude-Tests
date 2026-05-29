@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar Aptitude Test</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0}
+.container{max-width:900px;margin:20px auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+h1,h2{text-align:center}
+button{padding:10px 18px;margin:8px;cursor:pointer}
+.option{display:block;margin:10px 0;padding:10px;border:1px solid #ccc;border-radius:6px}
+#timer{font-weight:bold;color:#b00020}
+.hidden{display:none}
+.review{border-top:1px solid #ddd;padding-top:12px;margin-top:12px}
+.correct{color:green}
+.wrong{color:red}
+</style>
+</head>
+<body>
+<div class="container">
+<div id="start">
+<h1>Calendar Aptitude & Reasoning Test</h1>
+<p>Total Questions: 20 | Marks: 20 | Duration: 20 Minutes</p>
+<input id="name" placeholder="Enter your name" style="width:100%;padding:10px">
+<br><br>
+<button onclick="startTest()">Start Test</button>
+</div>
+
+<div id="exam" class="hidden">
+<div>Time Left: <span id="timer">20:00</span></div>
+<h3 id="progress"></h3>
+<p id="question"></p>
+<div id="options"></div>
+<button onclick="prevQ()">Previous</button>
+<button onclick="nextQ()">Next</button>
+</div>
+
+<div id="result" class="hidden"></div>
+</div>
+
+<script>
+const questions=[
+{q:"January 1, 2025 falls on Wednesday. January 26, 2025 is?",o:["Saturday","Sunday","Monday","Tuesday"],a:1,e:"25 days later. 25 mod 7 = 4. Wednesday +4 = Sunday."},
+{q:"If today is Tuesday, what day after 100 days?",o:["Thursday","Friday","Saturday","Sunday"],a:0,e:"100 mod 7 = 2. Tuesday +2 = Thursday."},
+{q:"Which is a leap year?",o:["1700","1800","1900","2000"],a:3,e:"Century years must be divisible by 400."},
+{q:"15 Aug 1947 was?",o:["Wednesday","Thursday","Friday","Saturday"],a:2,e:"India became independent on Friday."},
+{q:"If Mar 1, 2024 was Friday, Mar 31, 2024 was?",o:["Saturday","Sunday","Monday","Tuesday"],a:1,e:"30 days later. 30 mod 7=2. Friday+2=Sunday."},
+{q:"Odd days in a leap year?",o:["0","1","2","3"],a:2,e:"366 days = 52 weeks + 2 days."},
+{q:"Year starts on Monday. Number of Mondays?",o:["52","53","54","51"],a:1,e:"Extra day is Monday."},
+{q:"21st century began on?",o:["Saturday","Sunday","Monday","Tuesday"],a:0,e:"1 Jan 2001 was Monday; century began after 31 Dec 2000."},
+{q:"5 Jan Monday. 5 Mar same year(non-leap)?",o:["Wednesday","Thursday","Friday","Saturday"],a:1,e:"59 days difference. 59 mod7=3. Monday+3=Thursday."},
+{q:"Clock strikes once at 1, twice at 2 ... total in 24 hrs?",o:["144","156","168","180"],a:1,e:"1+2+...+12=78. Twice a day=156."},
+{q:"10 Jun 2023 Saturday. 10 Jun 2024?",o:["Sunday","Monday","Tuesday","Wednesday"],a:1,e:"2024 includes leap effect crossing Feb => Monday."},
+{q:"Maximum Sundays in a month?",o:["4","5","6","7"],a:1,e:"A month can have at most 5 Sundays."},
+{q:"Leap year starting Thursday has how many Sundays?",o:["52","53","54","51"],a:1,e:"Thursday and Friday occur 53 times."},
+{q:"If 1 Jan 2001 Monday, 1 Jan 2010?",o:["Thursday","Friday","Saturday","Sunday"],a:1,e:"Total odd days from 2001-2009 = 4."},
+{q:"Leap years between 1601 and 2000?",o:["96","97","98","99"],a:1,e:"97 leap years in 400-year cycle."},
+{q:"Which month can never have five Mon, Tue and Wed simultaneously?",o:["February","March","July","August"],a:0,e:"February has only 28/29 days."},
+{q:"26 Jan Monday. 15 Aug same year?",o:["Friday","Saturday","Sunday","Monday"],a:2,e:"201 days later => Sunday."},
+{q:"31 Dec 1999 was?",o:["Thursday","Friday","Saturday","Sunday"],a:1,e:"Known millennium date."},
+{q:"Year has 53 Sundays and 53 Mondays. Jan 1?",o:["Sunday","Monday","Saturday","Tuesday"],a:0,e:"Extra days are Sunday and Monday."},
+{q:"Today Wednesday. After 2^10 days?",o:["Wednesday","Thursday","Friday","Saturday"],a:2,e:"1024 mod7=2. Wednesday+2=Friday."}
+];
+let current=0,answers=new Array(questions.length).fill(null),time=1200,timer;
+function startTest(){
+if(!document.getElementById('name').value.trim()){alert('Enter name');return;}
+document.getElementById('start').classList.add('hidden');
+document.getElementById('exam').classList.remove('hidden');
+showQ();
+timer=setInterval(()=>{
+time--;
+let m=Math.floor(time/60),s=time%60;
+document.getElementById('timer').innerText=`${m}:${String(s).padStart(2,'0')}`;
+if(time<=0) submitTest();
+},1000);
+}
+function showQ(){
+let q=questions[current];
+document.getElementById('progress').innerText=`Question ${current+1} of ${questions.length}`;
+document.getElementById('question').innerText=q.q;
+let html="";
+q.o.forEach((op,i)=>{
+html+=`<label class="option"><input type="radio" name="opt" ${answers[current]===i?'checked':''} onchange="answers[${current}]=${i}"> ${op}</label>`;
+});
+document.getElementById('options').innerHTML=html;
+}
+function nextQ(){ if(current<questions.length-1){current++;showQ();} else submitTest(); }
+function prevQ(){ if(current>0){current--;showQ();} }
+function submitTest(){
+clearInterval(timer);
+let score=0;
+questions.forEach((q,i)=>{ if(answers[i]===q.a) score++; });
+document.getElementById('exam').classList.add('hidden');
+let r=`<h2>Result</h2><p><b>Name:</b> ${document.getElementById('name').value}</p>
+<p><b>Score:</b> ${score}/20</p><p><b>Percentage:</b> ${(score*5).toFixed(0)}%</p>
+<h3>Review Answers</h3>`;
+questions.forEach((q,i)=>{
+let correct=answers[i]===q.a;
+r+=`<div class='review'><b>Q${i+1}:</b> ${q.q}<br>
+<span class='${correct?"correct":"wrong"}'>Your Answer: ${answers[i]!=null?q.o[answers[i]]:"Not Answered"}</span><br>
+<span class='correct'>Correct Answer: ${q.o[q.a]}</span><br>
+Explanation: ${q.e}</div>`;
+});
+document.getElementById('result').innerHTML=r;
+document.getElementById('result').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
